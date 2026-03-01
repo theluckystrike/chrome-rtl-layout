@@ -1,0 +1,38 @@
+{
+    "name": "chrome-rtl-layout",
+    "version": "0.1.0",
+    "description": "RTL layout utilities for Chrome extensions — auto-detect, mirror CSS, bidirectional text, and direction switching for MV3.",
+    "author": "Zovo <hello@zovo.one>",
+    "license": "MIT",
+    "keywords": [
+        "chrome-extension",
+        "rtl",
+        "layout",
+        "bidi",
+        "direction",
+        "mirror",
+        "manifest-v3",
+        "browser-extension",
+        "arabic",
+        "hebrew"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/theluckystrike/chrome-rtl-layout.git"
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "prepublishOnly": "npm run build"
+    },
+    "devDependencies": {
+        "@types/chrome": "^0.0.260",
+        "typescript": "^5.3.3"
+    }
+}
