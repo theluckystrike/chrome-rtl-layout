@@ -1,12 +1,51 @@
-# chrome-rtl-layout — RTL Layout Utilities
-> **Built by [Zovo](https://zovo.one)** | `npm i chrome-rtl-layout`
+# chrome-rtl-layout
 
-Auto-detect RTL languages, apply direction, mirror CSS properties, and detect text direction.
+Detect and handle RTL (right-to-left) layouts in Chrome extensions.
 
-```typescript
-import { RTLLayout } from 'chrome-rtl-layout';
-RTLLayout.autoApply();
-RTLLayout.injectRTLStyles('padding-left: 0; padding-right: 16px;');
-const dir = RTLLayout.getTextDirection('مرحبا'); // 'rtl'
+## Overview
+
+chrome-rtl-layout provides utilities to detect text direction, handle RTL layouts, and create LTR/RTL aware UIs.
+
+## Installation
+
+```bash
+npm install chrome-rtl-layout
 ```
-MIT License
+
+## Usage
+
+### Detect Direction
+
+```javascript
+import { isRtl, getDirection } from 'chrome-rtl-layout';
+
+const dir = getDirection('مرحبا');
+console.log(dir); // 'rtl'
+
+const rtl = isRtl('Hello');
+console.log(rtl); // false
+```
+
+### Handle RTL in CSS
+
+```javascript
+import { rtl } from 'chrome-rtl-layout';
+
+document.body.classList.add(rtl ? 'rtl' : 'ltr');
+```
+
+## API
+
+### Functions
+
+- `isRtl(text)` - Check if text is RTL
+- `getDirection(text)` - Get 'ltr' or 'rtl'
+- `getDirectionFromLang(lang)` - Get direction from language code
+
+## Browser Support
+
+- Chrome 90+
+
+## License
+
+MIT
