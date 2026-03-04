@@ -1,143 +1,81 @@
 # chrome-rtl-layout
 
-[![npm version](https://img.shields.io/npm/v/chrome-rtl-layout)](https://npmjs.com/package/chrome-rtl-layout)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
-[![Chrome Web Extension](https://img.shields.io/badge/Chrome-Web%20Extension-orange.svg)](https://developer.chrome.com/docs/extensions/)
-[![CI Status](https://github.com/theluckystrike/chrome-rtl-layout/actions/workflows/ci.yml/badge.svg)](https://github.com/theluckystrike/chrome-rtl-layout/actions)
-[![Discord](https://img.shields.io/badge/Discord-Zovo-blueviolet.svg?logo=discord)](https://discord.gg/zovo)
-[![Website](https://img.shields.io/badge/Website-zovo.one-blue)](https://zovo.one)
-[![GitHub Stars](https://img.shields.io/github/stars/theluckystrike/chrome-rtl-layout?style=social)](https://github.com/theluckystrike/chrome-rtl-layout)
+> RTL layout utilities for Chrome extensions — auto-detect, mirror CSS, bidirectional text, and direction switching for MV3.
 
-> Detect and handle RTL (right-to-left) layouts in Chrome extensions.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**chrome-rtl-layout** provides utilities to detect text direction, handle RTL layouts, and create LTR/RTL aware UIs — essential for building extensions that support multiple languages and regions.
-
-Part of the [Zovo](https://zovo.one) developer tools family.
-
-## Features
-
-- ✅ **Text Direction Detection** - Detect RTL/LTR from text content
-- ✅ **Language-based Detection** - Get direction from language codes
-- ✅ **CSS Integration** - Easy RTL/LTR class handling
-- ✅ **TypeScript Support** - Full type definitions included
-- ✅ **Privacy-First** - No data collection, all local
-
-## Installation
+## Install
 
 ```bash
 npm install chrome-rtl-layout
 ```
 
-## Quick Start
+## Usage
 
-```typescript
-import { isRtl, getDirection } from 'chrome-rtl-layout';
+```js
+import { RTLLayout } from 'chrome-rtl-layout';
 
-const dir = getDirection('مرحبا');
-console.log(dir); // 'rtl'
+// Check if a locale is RTL
+RTLLayout.isRTL('ar');    // => true
+RTLLayout.isRTL('en-US'); // => false
 
-const rtl = isRtl('Hello');
-console.log(rtl); // false
-```
+// Apply direction attribute to the document based on locale
+RTLLayout.applyDirection('he');
+// sets document.documentElement.dir = 'rtl' and lang = 'he'
 
-## Usage Examples
+// Auto-detect locale from Chrome and apply direction
+RTLLayout.autoApply();
 
-### Detect Direction
+// Mirror a CSS property name for RTL layouts
+RTLLayout.mirrorProperty('margin-left');   // => 'margin-right'
+RTLLayout.mirrorProperty('padding-right'); // => 'padding-left'
 
-```typescript
-import { isRtl, getDirection } from 'chrome-rtl-layout';
+// Mirror inline styles on an element (swaps left/right margins and padding)
+const el = document.getElementById('sidebar');
+RTLLayout.mirrorElement(el);
 
-const dir = getDirection('مرحبا');
-console.log(dir); // 'rtl'
+// Inject a scoped RTL stylesheet
+RTLLayout.injectRTLStyles('.sidebar { float: right; text-align: right; }');
 
-const rtl = isRtl('Hello');
-console.log(rtl); // false
-```
-
-### Handle RTL in CSS
-
-```typescript
-import { rtl } from 'chrome-rtl-layout';
-
-document.body.classList.add(rtl ? 'rtl' : 'ltr');
-```
-
-### Language-based Detection
-
-```typescript
-import { getDirectionFromLang } from 'chrome-rtl-layout';
-
-const dir1 = getDirectionFromLang('ar');  // 'rtl'
-const dir2 = getDirectionFromLang('en');  // 'ltr'
-const dir3 = getDirectionFromLang('he');  // 'rtl'
+// Detect text direction from content
+RTLLayout.getTextDirection('مرحبا'); // => 'rtl'
+RTLLayout.getTextDirection('Hello'); // => 'ltr'
 ```
 
 ## API
 
-### Functions
+### `RTLLayout`
 
-| Function | Description |
-|----------|-------------|
-| `isRtl(text)` | Check if text is RTL |
-| `getDirection(text)` | Get 'ltr' or 'rtl' |
-| `getDirectionFromLang(lang)` | Get direction from language code |
+All methods are static.
 
-## Browser Support
+#### `RTLLayout.isRTL(locale: string): boolean`
 
-- Chrome 90+
-- Manifest V3
+Returns `true` if the given locale code belongs to an RTL language. Supports Arabic, Hebrew, Farsi, Urdu, Pashto, Sindhi, Yiddish, Kurdish, Divehi, and Central Kurdish.
 
-## Contributing
+#### `RTLLayout.applyDirection(locale: string): void`
 
-Contributions are welcome! Please follow these steps:
+Sets `document.documentElement.dir` to `'rtl'` or `'ltr'` and `document.documentElement.lang` to the provided locale.
 
-1. **Fork** the repository
-2. **Create** a feature branch: `git checkout -b feature/rtl-feature`
-3. **Make** your changes
-4. **Test** your changes: `npm test`
-5. **Commit** your changes: `git commit -m 'Add new feature'`
-6. **Push** to the branch: `git push origin feature/rtl-feature`
-7. **Submit** a Pull Request
+#### `RTLLayout.autoApply(): void`
 
-### Development Setup
+Detects the user's locale via `chrome.i18n.getUILanguage()` and calls `applyDirection` with it.
 
-```bash
-# Clone the repository
-git clone https://github.com/theluckystrike/chrome-rtl-layout.git
-cd chrome-rtl-layout
+#### `RTLLayout.mirrorProperty(prop: string): string`
 
-# Install dependencies
-npm install
+Returns the RTL-mirrored equivalent of a CSS property name or declaration (e.g., `'margin-left'` becomes `'margin-right'`, `'float: left'` becomes `'float: right'`). Returns the original value if no mirror mapping exists.
 
-# Build
-npm run build
-```
+#### `RTLLayout.mirrorElement(el: HTMLElement): void`
 
-## Built by Zovo
+Swaps left/right `margin` and `padding` inline styles on the given element. Only applies when the document direction is `'rtl'`.
 
-Part of the [Zovo](https://zovo.one) developer tools family — privacy-first Chrome extensions built by developers, for developers.
+#### `RTLLayout.injectRTLStyles(css: string): HTMLStyleElement`
 
-## See Also
+Creates a `<style>` element scoped to `[dir="rtl"]` with the provided CSS and appends it to `document.head`. Returns the created style element.
 
-### Related Zovo Repositories
+#### `RTLLayout.getTextDirection(text: string): 'rtl' | 'ltr'`
 
-- [chrome-page-info](https://github.com/theluckystrike/chrome-page-info) - Page information extractor
-- [chrome-storage-plus](https://github.com/theluckystrike/chrome-storage-plus) - Type-safe storage
-- [chrome-extension-starter-mv3](https://github.com/theluckystrike/chrome-extension-starter-mv3) - Extension template
-
-### Zovo Chrome Extensions
-
-- [Zovo Tab Manager](https://chrome.google.com/webstore/detail/zovo-tab-manager) - Manage tabs efficiently
-- [Zovo Focus](https://chrome.google.com/webstore/detail/zovo-focus) - Block distractions
-- [Zovo Permissions Scanner](https://chrome.google.com/webstore/detail/zovo-permissions-scanner) - Check extension privacy grades
-
-Visit [zovo.one](https://zovo.one) for more information.
+Examines the first character of the string to determine whether the text is RTL (Arabic, Hebrew, Syriac, Thaana, or Arabic Presentation Forms) or LTR.
 
 ## License
 
-MIT — [Zovo](https://zovo.one)
-
----
-
-*Built by developers, for developers. No compromises on privacy.*
+MIT
