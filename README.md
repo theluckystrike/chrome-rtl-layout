@@ -1,32 +1,23 @@
 # chrome-rtl-layout
 
-[![npm version](https://img.shields.io/npm/v/chrome-rtl-layout)](https://npmjs.com/package/chrome-rtl-layout)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
-[![Discord](https://img.shields.io/badge/Discord-Zovo-blueviolet.svg?logo=discord)](https://discord.gg/zovo)
-[![Website](https://img.shields.io/badge/Website-zovo.one-blue)](https://zovo.one)
-[![GitHub Stars](https://img.shields.io/github/stars/theluckystrike/chrome-rtl-layout?style=social)](https://github.com/theluckystrike/chrome-rtl-layout)
+RTL layout utilities for Chrome extensions. Handles direction detection, CSS property mirroring, bidirectional text analysis, and scoped RTL stylesheet injection. Built for Manifest V3.
 
-> RTL layout utilities for Chrome extensions — auto-detect, mirror CSS, bidirectional text, and direction switching for MV3.
+INSTALL
 
-Part of the [Zovo](https://zovo.one) developer tools family.
-
-## Install
-
-```bash
+```
 npm install chrome-rtl-layout
 ```
 
-## Usage
+USAGE
 
 ```js
 import { RTLLayout } from 'chrome-rtl-layout';
 
 // Check if a locale is RTL
-RTLLayout.isRTL('ar');    // => true
-RTLLayout.isRTL('en-US'); // => false
+RTLLayout.isRTL('ar');    // true
+RTLLayout.isRTL('en-US'); // false
 
-// Apply direction attribute to the document based on locale
+// Apply direction to the document based on a locale string
 RTLLayout.applyDirection('he');
 // sets document.documentElement.dir = 'rtl' and lang = 'he'
 
@@ -34,82 +25,48 @@ RTLLayout.applyDirection('he');
 RTLLayout.autoApply();
 
 // Mirror a CSS property name for RTL layouts
-RTLLayout.mirrorProperty('margin-left');   // => 'margin-right'
-RTLLayout.mirrorProperty('padding-right'); // => 'padding-left'
+RTLLayout.mirrorProperty('margin-left');   // 'margin-right'
+RTLLayout.mirrorProperty('padding-right'); // 'padding-left'
+RTLLayout.mirrorProperty('float: left');   // 'float: right'
 
 // Mirror inline styles on an element (swaps left/right margins and padding)
 const el = document.getElementById('sidebar');
 RTLLayout.mirrorElement(el);
 
-// Inject a scoped RTL stylesheet
-RTLLayout.injectRTLStyles('.sidebar { float: right; text-align: right; }');
+// Inject a scoped RTL stylesheet wrapped in [dir="rtl"]
+const styleEl = RTLLayout.injectRTLStyles('.sidebar { float: right; }');
 
 // Detect text direction from content
-RTLLayout.getTextDirection('مرحبا'); // => 'rtl'
-RTLLayout.getTextDirection('Hello'); // => 'ltr'
+RTLLayout.getTextDirection('مرحبا'); // 'rtl'
+RTLLayout.getTextDirection('Hello'); // 'ltr'
 ```
 
-## API
+API
 
-### `RTLLayout`
+All methods live on the RTLLayout class as static members. No instantiation needed.
 
-All methods are static.
+RTLLayout.isRTL(locale) returns boolean. Returns true when the base language tag matches a known RTL language. Supported languages are Arabic, Hebrew, Farsi, Urdu, Pashto, Sindhi, Yiddish, Kurdish, Divehi, and Central Kurdish.
 
-#### `RTLLayout.isRTL(locale: string): boolean`
+RTLLayout.applyDirection(locale) returns void. Sets document.documentElement.dir to rtl or ltr and sets document.documentElement.lang to the provided locale string.
 
-Returns `true` if the given locale code belongs to an RTL language. Supports Arabic, Hebrew, Farsi, Urdu, Pashto, Sindhi, Yiddish, Kurdish, Divehi, and Central Kurdish.
+RTLLayout.autoApply() returns void. Reads the user locale from chrome.i18n.getUILanguage() and passes it to applyDirection. Call this once when your popup or options page loads.
 
-#### `RTLLayout.applyDirection(locale: string): void`
+RTLLayout.mirrorProperty(prop) returns string. Maps a CSS property or declaration to its RTL counterpart. Handles margin-left/right, padding-left/right, left/right, border-left/right, text-align, and float. Returns the original string when no mapping exists.
 
-Sets `document.documentElement.dir` to `'rtl'` or `'ltr'` and `document.documentElement.lang` to the provided locale.
+RTLLayout.mirrorElement(el) returns void. Swaps left/right margin and padding inline styles on the given HTMLElement. Only runs when document direction is rtl.
 
-#### `RTLLayout.autoApply(): void`
+RTLLayout.injectRTLStyles(css) returns HTMLStyleElement. Creates a style element scoped under [dir="rtl"], fills it with the provided CSS, and appends it to document.head. Returns the created element so you can remove it later if needed.
 
-Detects the user's locale via `chrome.i18n.getUILanguage()` and calls `applyDirection` with it.
+RTLLayout.getTextDirection(text) returns "rtl" or "ltr". Inspects the first character of the string against Unicode ranges for Arabic, Hebrew, Syriac, Thaana, and Arabic Presentation Forms. Returns rtl if matched, ltr otherwise.
 
-#### `RTLLayout.mirrorProperty(prop: string): string`
+SUPPORTED RTL LANGUAGES
 
-Returns the RTL-mirrored equivalent of a CSS property name or declaration (e.g., `'margin-left'` becomes `'margin-right'`, `'float: left'` becomes `'float: right'`). Returns the original value if no mirror mapping exists.
+Arabic (ar), Hebrew (he), Farsi (fa), Urdu (ur), Pashto (ps), Sindhi (sd), Yiddish (yi), Kurdish (ku), Divehi (dv), Central Kurdish (ckb).
 
-#### `RTLLayout.mirrorElement(el: HTMLElement): void`
+LICENSE
 
-Swaps left/right `margin` and `padding` inline styles on the given element. Only applies when the document direction is `'rtl'`.
-
-#### `RTLLayout.injectRTLStyles(css: string): HTMLStyleElement`
-
-Creates a `<style>` element scoped to `[dir="rtl"]` with the provided CSS and appends it to `document.head`. Returns the created style element.
-
-#### `RTLLayout.getTextDirection(text: string): 'rtl' | 'ltr'`
-
-Examines the first character of the string to determine whether the text is RTL (Arabic, Hebrew, Syriac, Thaana, or Arabic Presentation Forms) or LTR.
-
-## License
-
-MIT
-
-## See Also
-
-### Related Zovo Repositories
-
-- [chrome-extension-core](https://github.com/theluckystrike/chrome-extension-core) - Essential utilities for Chrome extension development
-- [chrome-css-injector](https://github.com/theluckystrike/chrome-css-injector) - CSS injection utilities
-- [chrome-extension-starter-mv3](https://github.com/theluckystrike/chrome-extension-starter-mv3) - Production-ready Chrome extension starter
-
-### Zovo Chrome Extensions
-
-- [Zovo Tab Manager](https://chrome.google.com/webstore/detail/zovo-tab-manager) - Manage tabs efficiently
-- [Zovo Focus](https://chrome.google.com/webstore/detail/zovo-focus) - Block distractions
-
-Visit [zovo.one](https://zovo.one) for more information.
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+MIT. See LICENSE file.
 
 ---
 
-Built by [Zovo](https://zovo.one)
+Built at zovo.one
